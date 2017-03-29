@@ -7,9 +7,7 @@
 #include <stdio.h>
 
 typedef unsigned char  BIT;
-typedef unsigned short WORD;
-typedef unsigned long DWORD;
-
+typedef unsigned long WORD;
 BIT IP[] = {58, 50, 42, 34, 26, 18, 10, 2,
 		60, 52, 44, 36, 28, 20, 12, 4,
 		62, 54, 46, 38, 30, 22, 14, 6,
@@ -30,13 +28,14 @@ BIT IIP[] = {40, 8, 16, 56, 24, 64, 32, 39,
 
 int main (void) {
 	int i;
-	DWORD tempMask; //temp 뜻 : 임시직원
-	DWORD setMask;
+	WORD text[2] = {0x55555555, 0x12312312}; //16진수 0x00000000의 뒤의 숫자0 8개가 각각 2진수 4bit씩 나타낸다.
+	WORD tempMask; //temp 뜻 : 임시직원
+	WORD setMask;
 
-	DWORD text = 0x211D1AE3; //10진수로 555,555,555 2진수 : 00100001 00011101  00011010 11100011
-	//16진수 0x00000000의 뒤의 숫자0 8개가 각각 2진수 4bit씩 나타낸다.
-	WORD data[2] = {0}; //어짜피 데이터 영역에 있으면 0으로 초기화
+	WORD data[2] = {0};
 	WORD newData[2] = {0};
+
+	printf("text[0](left) : %x // text[1](right) : %x\n", text[0],text[1]);
 
 	//데이터 분리 16 + 16 = 32
 	for(i = 0 ; i <16 ; i++) {
