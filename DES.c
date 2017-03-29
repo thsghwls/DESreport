@@ -80,46 +80,51 @@ void encodeData (WORD* data, WORD* newdata) {
 	WORD buf;
 	WORD tempMask,mask; //temp 뜻 : 임시직원
 	WORD setMask;
-	for(i = 31 ; i >= 0 ; i--) {
+	for(i = 0 ; i <32 ; i++) {
 		tempMask = 0x00000001;
 		setMask = 0x00000001<<(31-i); //비트연산자를 통해 최우측비트가 한자리수가 높아지면(1씩증가하면) 2진수 한자리씩 가져오게된다.
 
-		if((IP[i]<= 32) && (data[1] & (tempMask << (32-IP[i]))))
-			newdata[1] |= setMask;
-		else if((IP[i]>32 && (data[0] & (tempMask << (64-IP[i])))))
-			newdata[1] |= setMask;
+		if((IP[i]<= 32) && (data[1] & setMask))
+			newdata[1] |= (tempMask << (32-IP[i]));
+		else if((IP[i]>32 && (data[1] & setMask)))
+			newdata[0] |= (tempMask << (64-IP[i]));
+
 		printf("tempMask : %32x\n", tempMask << (32-IP[i]));
 		printf("setMask  : %32x\n", setMask);
 		printf("         : 1000000000 0000000000 0000000000\n");
 		printf(" IP[%d]  : %d [%s]\n",i, IP[i], IP[i]>32 ? " >32 " : " <=32 ");
-		if((IP[i]<= 32) && (data[1] & (tempMask << (32-IP[i])))) {
-			printf("data[0]  : ");
+		if((IP[i]<= 32) && (data[1] & setMask)) {
+			printf("newdata[1]: ");
 			for(j = 31 ; j >= 0 ; j--) {
 				mask=0x00000001 << j;
-				buf = (data[0] & mask)>> j;
+				buf = (newdata[1] & mask)>> j;
 				printf("%d",buf);
 			}
+			puts("");
+			viewBlock(newdata[1]);
+			puts("");
 		}
-		else if((IP[i]>32 && (data[0] & (tempMask << (64-IP[i]))))) {
-			printf("data[1]  : ");
+		else if((IP[i]>32 && (data[1] & setMask))) {
+			printf("newdata[0]: ");
 			for(j = 31 ; j >= 0 ; j--) {
 				mask=0x00000001 << j;
-				buf = (data[1] & mask)>> j;
+				buf = (newdata[0] & mask)>> j;
 				printf("%d",buf);
 			}
+			puts("");
+			viewBlock(newdata[0]);
+			puts("");
 		}
-		puts("");
-		viewBlock(newdata[1]);
 	}
 
-	for(i = 63 ; i >= 32 ; i--) {
+	for(i = 32 ; i < 64 ; i++) {
 		tempMask = 0x00000001;
 		setMask = 0x00000001<<(63-i); //비트연산자를 통해 최우측비트가 한자리수가 높아지면(1씩증가하면) 2진수 한자리씩 가져오게된다.
 
-		if((IP[i]<= 32) && (data[1] & (tempMask << (32-IP[i]))))
-			newdata[0] |= setMask;
-		else if((IP[i]>32 && (data[0] & (tempMask << (64-IP[i])))))
-			newdata[0] |= setMask;
+		if((IP[i]<= 32) && (data[0] & setMask))
+			newdata[1] |=(tempMask << (32-IP[i]));
+		else if((IP[i]>32 && (data[0] & setMask)))
+			newdata[0] |=(tempMask << (64-IP[i]));
 		//		viewBlock(newdata[0]);
 	}
 	puts(">>>>인코딩 완료! <<<<");
