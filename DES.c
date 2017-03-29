@@ -56,10 +56,10 @@ int main (void) {
 		//		printf("%x\n",data[1]);
 	}
 
-	printf("L == data[1] %d %x // R ==data[0] %d %x // L == R %d %x //",data[0]==0x1AE3,data[0],data[1]==0x211D,data[1], data[0]==data[1] , text);
+	printf("L == data[1] %d %x // R ==data[0] %d %x // %x //\n",data[0]==0x1AE3,data[0],data[1]==0x211D,data[1] , text);
 	//자꾸 짤려나와서 보니 test자체가 dad638e3이다.......longlong 형이라 8바이트이지만 안되나봄. 그래서 32비트로 함
 
-	for(i = 31 ; i >= 0 ; i--) {
+	for(i = 32 ; i >= 0 ; i--) {
 		tempMask = 0x00000001;
 		setMask = 0x00000001<<(31-i); //비트연산자를 통해 최우측비트가 한자리수가 높아지면(1씩증가하면) 2진수 한자리씩 가져오게된다.
 
@@ -67,11 +67,21 @@ int main (void) {
 			newData[1] |= setMask;
 		else if((IP[i]>32 && (data[0] & (tempMask << (64-IP[i])))))
 			newData[1] |= setMask;
-		printf("newdata[1] = %x\n",newData[1]);
+//		printf("%d : newdata[1] = %x\n",31-i,newData[1]);
 	}
 
+	for(i = 63 ; i >= 32 ; i--) {
+		tempMask = 0x00000001;
+		setMask = 0x00000001<<(31-i); //비트연산자를 통해 최우측비트가 한자리수가 높아지면(1씩증가하면) 2진수 한자리씩 가져오게된다.
 
+		if((IP[i]<= 32) && (data[1] & (tempMask << (32-IP[i]))))
+			newData[0] |= setMask;
+		else if((IP[i]>32 && (data[0] & (tempMask << (64-IP[i])))))
+			newData[0] |= setMask;
+//		printf("%d : newdata[0] = %x\n",63-i, newData[0]);
+	}
 
-
-	return 0;
+	data[1] = newData[1];
+	data[0] = newData[0];
+	printf("L == data[1] %d %x // R ==data[0] %d %x // %x //\n",data[0]==0x1AE3,data[0],data[1]==0x211D,data[1] , text);
 }
