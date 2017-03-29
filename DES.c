@@ -8,6 +8,11 @@
 
 typedef unsigned char  BIT;
 typedef unsigned long WORD;
+
+void viewBlock (WORD);
+void encodeData (WORD*, WORD*);
+void decodeData (WORD*, WORD*);
+
 BIT IP[] = {58, 50, 42, 34, 26, 18, 10, 2,
 		60, 52, 44, 36, 28, 20, 12, 4,
 		62, 54, 46, 38, 30, 22, 14, 6,
@@ -28,59 +33,97 @@ BIT IIP[] = {40, 8, 16, 56, 24, 64, 32, 39,
 
 int main (void) {
 	int i;
-	WORD text[2] = {0x55555555, 0x12312312}; //16진수 0x00000000의 뒤의 숫자0 8개가 각각 2진수 4bit씩 나타낸다.
-	WORD tempMask; //temp 뜻 : 임시직원
+	//이미 64bit를 32bit씩 나눴다고 가정
+	WORD data[2] = {/*right*/0x55555555, /*left*/0x12312312}; //16진수 0x00000000의 뒤의 숫자0 8개가 각각 2진수 4bit씩 나타낸다.
+	//left : 0010010 00110001 00100011 00010010 // right : 01010101 01010101 01010101 01010101
+	WORD newdata[2] = {0};
+
+	puts("==== data[1] ====");
+	viewBlock(data[1]);
+	puts("==== data[0] ====");
+	viewBlock(data[0]);
+
+	//encode
+	encodeData(data, newdata);
+
+	puts("==== newdata[1] ====");
+	viewBlock(newdata[1]);
+	puts("==== newdata[0] ====");
+	viewBlock(newdata[0]);
+
+	//decode
+	decodeData(data, newdata);
+
+}
+void viewBlock (WORD data) {
+	int i;
+	WORD mask;
+	WORD temp;
+	printf(">>  %x  <<\n" , data);
+	puts(" =====================");
+	for(i = 31 ; i >= 0 ; i--) {
+		temp = 0;
+		mask = 0x00000001 << i;
+		temp = mask & data;
+		temp = temp>> i;
+
+		if(i!=31&&(i+1)%8==0)
+			puts("");
+		printf(" %d ", temp);
+	}
+	puts("\n =====================");
+	puts("");
+}
+
+void encodeData (WORD* data, WORD* newdata) {
+	int i, j;
+	WORD buf;
+	WORD tempMask,mask; //temp 뜻 : 임시직원
 	WORD setMask;
-
-	WORD data[2] = {0};
-	WORD newData[2] = {0};
-
-	printf("text[0](left) : %x // text[1](right) : %x\n", text[0],text[1]);
-
-	//데이터 분리 16 + 16 = 32
-	for(i = 0 ; i <16 ; i++) {
-		setMask   = 0x00000001 << i;
-		tempMask = setMask & text;
-		//				printf("%x\n",tempMask); //재대로 들어가는지 확인
-		data[0]|= tempMask; //right
-		//		printf("%x\n",data[0]); //재대로 들어가는지 확인
-
-	}
-
-	for(i = 16 ; i < 32 ; i++) {
-		setMask   = 0x00000001 << i;
-		tempMask = setMask & text;
-		//		printf("%x\n",tempMask); //재대로 들어가는지 확인
-		data[1] |= tempMask >> 16; //이것때문이였다....................................>> 16... //left
-		//		printf("%x\n",data[1]);
-	}
-
-	printf("L == data[1] %d %x // R ==data[0] %d %x // %x //\n",data[0]==0x1AE3,data[0],data[1]==0x211D,data[1] , text);
-	//자꾸 짤려나와서 보니 test자체가 dad638e3이다.......longlong 형이라 8바이트이지만 안되나봄. 그래서 32비트로 함
-
-	for(i = 32 ; i >= 0 ; i--) {
+	for(i = 31 ; i >= 0 ; i--) {
 		tempMask = 0x00000001;
 		setMask = 0x00000001<<(31-i); //비트연산자를 통해 최우측비트가 한자리수가 높아지면(1씩증가하면) 2진수 한자리씩 가져오게된다.
 
 		if((IP[i]<= 32) && (data[1] & (tempMask << (32-IP[i]))))
-			newData[1] |= setMask;
+			newdata[1] |= setMask;
 		else if((IP[i]>32 && (data[0] & (tempMask << (64-IP[i])))))
-			newData[1] |= setMask;
-//		printf("%d : newdata[1] = %x\n",31-i,newData[1]);
+			newdata[1] |= setMask;
+		printf("tempMask : %32x\n", tempMask << (32-IP[i]));
+		printf("setMask  : %32x\n", setMask);
+		printf("         : 1000000000 0000000000 0000000000\n");
+		printf(" IP[%d]  : %d [%s]\n",i, IP[i], IP[i]>32 ? " >32 " : " <=32 ");
+		if((IP[i]<= 32) && (data[1] & (tempMask << (32-IP[i])))) {
+			printf("data[0]  : ");
+			for(j = 31 ; j >= 0 ; j--) {
+				mask=0x00000001 << j;
+				buf = (data[0] & mask)>> j;
+				printf("%d",buf);
+			}
+		}
+		else if((IP[i]>32 && (data[0] & (tempMask << (64-IP[i]))))) {
+			printf("data[1]  : ");
+			for(j = 31 ; j >= 0 ; j--) {
+				mask=0x00000001 << j;
+				buf = (data[1] & mask)>> j;
+				printf("%d",buf);
+			}
+		}
+		puts("");
+		viewBlock(newdata[1]);
 	}
 
 	for(i = 63 ; i >= 32 ; i--) {
 		tempMask = 0x00000001;
-		setMask = 0x00000001<<(31-i); //비트연산자를 통해 최우측비트가 한자리수가 높아지면(1씩증가하면) 2진수 한자리씩 가져오게된다.
+		setMask = 0x00000001<<(63-i); //비트연산자를 통해 최우측비트가 한자리수가 높아지면(1씩증가하면) 2진수 한자리씩 가져오게된다.
 
 		if((IP[i]<= 32) && (data[1] & (tempMask << (32-IP[i]))))
-			newData[0] |= setMask;
+			newdata[0] |= setMask;
 		else if((IP[i]>32 && (data[0] & (tempMask << (64-IP[i])))))
-			newData[0] |= setMask;
-//		printf("%d : newdata[0] = %x\n",63-i, newData[0]);
+			newdata[0] |= setMask;
+		//		viewBlock(newdata[0]);
 	}
+	puts(">>>>인코딩 완료! <<<<");
+}
+void decodeData (WORD* data , WORD* newdata) {
 
-	data[1] = newData[1];
-	data[0] = newData[0];
-	printf("L == data[1] %d %x // R ==data[0] %d %x // %x //\n",data[0]==0x1AE3,data[0],data[1]==0x211D,data[1] , text);
 }
