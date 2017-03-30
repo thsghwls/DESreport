@@ -1,17 +1,18 @@
 /*
- * DES.c
+ * DES.h
  *
- *  Created on: 2017. 3. 28.
- *      Author: Computer
+ *  Created on: 2017. 3. 30.
+ *      Author: 컴퓨터
  */
-#include <stdio.h>
+
+#ifndef DES_H_
+#define DES_H_
+
+#endif /* DES_H_ */
 
 typedef unsigned char  BIT;
-typedef unsigned long WORD;
-
-void viewBlock (WORD);
-void encodeData (WORD*, WORD*);
-void decodeData (WORD*, WORD*);
+typedef unsigned short HWORD;	//Half Word
+typedef unsigned long WORD;		//Word
 
 BIT IP[] = {58, 50, 42, 34, 26, 18, 10, 2,
 		60, 52, 44, 36, 28, 20, 12, 4,
@@ -31,52 +32,11 @@ BIT IIP[] = {40, 8, 48, 16, 56, 24, 64, 32,
 		34, 2, 42, 10, 50, 18, 58, 26,
 		33, 1, 41, 9, 49, 17, 57, 25};
 
-int main (void) {
-	//	16진수 0x00000000의 뒤의 숫자0 8개가 각각 2진수 4bit씩 나타낸다.
-	//	이미 64bit를 32bit씩 나눴다고 가정
-	//	left(data[1]) : 0010010 00110001 00100011 00010010 , right(data[0]) : 01010101 01010101 01010101 01010101
-	WORD data[2] = {/*right*/0x55555555, /*left*/0x12312312};
-	WORD newdata[2] = {0};
-	int i;
+void viewBlock (WORD);														//1
+void InitialPermutation (WORD* data, WORD* newdata);				//2
+void InverseInitialPermutation (WORD* data , WORD* newdata);	//3
 
-	puts("==== data[1] ====");
-	viewBlock(data[1]);
-	puts("==== data[0] ====");
-	viewBlock(data[0]);
-
-	//encode
-	encodeData(data, newdata);
-
-	puts("==== newdata[1] ====");
-	viewBlock(newdata[1]);
-	puts("==== newdata[0] ====");
-	viewBlock(newdata[0]);
-
-	//데이터 저장 및 초기화
-	data[1]=newdata[1];
-	data[0]=newdata[0];
-	newdata[1]=0;
-	newdata[0]=0;
-
-	//decode
-	decodeData(data, newdata);
-
-	puts("==== newdata[1] ====");
-	viewBlock(newdata[1]);
-	puts("==== newdata[0] ====");
-	viewBlock(newdata[0]);
-
-	//데이터 저장 및 초기화
-	data[1]=newdata[1];
-	data[0]=newdata[0];
-	newdata[1]=0;
-	newdata[0]=0;
-
-	puts("==== data[1] ====");
-	viewBlock(data[1]);
-	puts("==== data[0] ====");
-	viewBlock(data[0]);
-}
+//1
 void viewBlock (WORD data) {
 	int i;
 	WORD mask;
@@ -97,7 +57,8 @@ void viewBlock (WORD data) {
 	puts("");
 }
 
-void encodeData (WORD* data, WORD* newdata) {
+//2
+void InitialPermutation (WORD* data, WORD* newdata) {
 	int i, j;
 	WORD buf;
 	WORD tempMask,mask; //temp 뜻 : 임시직원
@@ -178,9 +139,11 @@ void encodeData (WORD* data, WORD* newdata) {
 			puts("");
 		}
 	}
-	puts(">>>>인코딩 완료! <<<<");
+	puts(">>>>IP 완료! <<<<");
 }
-void decodeData (WORD* data , WORD* newdata) {
+
+//3
+void InverseInitialPermutation (WORD* data , WORD* newdata) {
 	int i, j;
 	WORD buf;
 	WORD tempMask,mask; //temp 뜻 : 임시직원
@@ -261,5 +224,6 @@ void decodeData (WORD* data , WORD* newdata) {
 			puts("");
 		}
 	}
-	puts(">>>>디코딩 완료! <<<<");
+	puts(">>>>IIP 완료! <<<<");
 }
+
