@@ -20,7 +20,6 @@ void PermutedChoice1(WORD *Key);
 void PermutedChoice2(WORD *Key);
 
 void InitialPermutation(WORD *Data);
-
 void Round(WORD *dWord, WORD RoundKey1, WORD RoundKey0);
 void ExpansionPermutation (WORD RightHalf, WORD *eWord);
 WORD SubstitutionChoice(WORD *eWord);
