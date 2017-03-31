@@ -17,35 +17,32 @@ BIT IIP[] = {40, 8, 48, 16, 56, 24, 64, 32,
 		33, 1, 41, 9, 49, 17, 57, 25};
 
 
-void InverseInitialPermutation (WORD* data) {
-	WORD newdata[2] = {0};
-	int i, j;
-	WORD buf;
-	WORD tempMask,mask; //temp 뜻 : 임시직원
+void InverseInitialPermutation(WORD *Data)
+{
+	int i;
+	WORD tmpMask;
 	WORD setMask;
-	for(i = 0 ; i <32 ; i++) {
-		tempMask = 0x00000001;
-		setMask = 0x00000001<<(31-i); //비트연산자를 통해 최우측비트가 한자리수가 높아지면(1씩증가하면) 2진수 한자리씩 가져오게된다.
-
-		//		동작부분
-		if((IIP[i]<= 32) && (data[1] & setMask))
-			newdata[1] |= (tempMask << (32-IIP[i]));
-		else if((IIP[i]>32 && (data[1] & setMask)))
-			newdata[0] |= (tempMask << (64-IIP[i]));
+	WORD NewData[2]= {0, };
+	for(i = 31 ;i >= 0 ; i--)
+	{
+		tmpMask = 0x00000001;
+		setMask = 0x00000001<<(31-i);
+		if((IIP[i] <= 32) && (Data[1] & (tmpMask << (32-IIP[i])))) {
+			NewData[1] = NewData[1] | setMask;
+		}else if((IIP[i] > 32) && (Data[0] & (tmpMask << (64-IIP[i])))) {
+			NewData[1] = NewData[1] | setMask;
+		}
 	}
-	//		동작부분
-	for(i = 32 ; i < 64 ; i++) {
-		tempMask = 0x00000001;
-		setMask = 0x00000001<<(63-i); //비트연산자를 통해 최우측비트가 한자리수가 높아지면(1씩증가하면) 2진수 한자리씩 가져오게된다.
-
-		if((IIP[i]<= 32) && (data[0] & setMask))
-			newdata[1] |=(tempMask << (32-IIP[i]));
-		else if((IIP[i]>32 && (data[0] & setMask)))
-			newdata[0] |=(tempMask << (64-IIP[i]));
+	for(i = 63 ; i >=32 ; i--)
+	{
+		tmpMask = 0x00000001;
+		setMask = 0x00000001<<(63-i);
+		if((IIP[i] <= 32) && (Data[1] & (tmpMask << (32-IIP[i])))) {
+			NewData[0] = NewData[0] | setMask;
+		}else if((IIP[i] > 32) && (Data[0] & (tmpMask << (64-IIP[i])))) {
+			NewData[0] = NewData[0] | setMask;
+		}
 	}
-	puts(">>>>IIP 완료! <<<<");
-	data[1]=newdata[1];		//left   32-bit
-	data[0]=newdata[0];		//right 32-bit
-	newdata[1]=0;
-	newdata[0]=0;
+	Data[1] = NewData[1];
+	Data[0] = NewData[0];
 }
