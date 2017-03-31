@@ -19,13 +19,14 @@ BIT PC_2[]= {
 void PermutedChoice2(WORD *Key)
 {
 	int i;
-	WORD tmpMask;
+	WORD tmpMask = 0x00000001;;
 	WORD KeyMask;
 	WORD NewKey[2] = {0,0 };
 
-	tmpMask = 0x00000001;
+	// PC_2[0]~PC_2[23]까지(3x8)에 해당하는 위치에 bit를 찾아 1이면 값을 넣고 0이면 Pass. 나머지는 IP방식과 동일.
 	for(int i = 0 ; i < 24 ; i++)
 	{
+		//왼쪽 8bit를 제외하고 나머지 24bit 위치에 왼쪽부터 순차적으로 bit를 넣음
 		KeyMask = 0x00800000 >> i;
 		if((PC_2[i] <= 28) && (Key[1] & (tmpMask << (28-PC_2[i])))) {
 			NewKey[1] = NewKey[1] | KeyMask;
@@ -33,6 +34,7 @@ void PermutedChoice2(WORD *Key)
 			NewKey[1] = NewKey[1] | KeyMask;
 		}
 	}
+	//	PC_2[24]~PC_2[47]까지(3x8)에 해당하는 위치에 bit를 찾아 1이면 값을 넣고 0이면 Pass. 나머지는 IP방식과 동일.
 	for(i = 24 ; i < 48 ; i++)
 	{
 		KeyMask = 0x00800000 >> (i-24);
@@ -44,6 +46,7 @@ void PermutedChoice2(WORD *Key)
 			NewKey[0] = NewKey[0] | KeyMask;
 		}
 	}
+	//	순열선택2를 수행한 결과 key 길이가 56bit -> 48bit로 감소
 	Key[0] = NewKey[0];
 	Key[1] = NewKey[1];
 }

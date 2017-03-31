@@ -67,27 +67,43 @@ BIT SBox_DES[8][4][16] = {
 
 WORD SubstitutionChoice(WORD *eWord)
 {
-	int row,col;
+	//	>> S-box를 수행하는데 필요한 변수 정의 <<
+	//	S-box는 총 8개가 있는데 S-box 하나에 6bit씩 연산을 수행한다. 6bit중 첫번째와 마지막 bit는 row가 되고 가운데 4개bit는 column이 된다.
+	int i, row,col;
 	WORD tmp0, tmp1;
 	tmp0 = eWord[0];
 	tmp1 = eWord[1];
 	int shift;
 
+	//	tmp0, tmp1에 각각 24bit 값을 넣고 parameter로 넘겨받은 주소의 기억공간은 0으로 초기화
 	eWord[0] = 0;
 	eWord[1] = 0;
 
-	for(int i = 0 ; i < 4 ; i++)
+	for(i = 0 ; i < 4 ; i++)
 	{
+		//	SBox_DES[][][]를 통해 얻는 값을 각 12, 8, 4, 0만큼 좌측으로 shift한다.
+		//	S-box를 통해 얻어지는 값은 4bit이기 때문에 총 16bit 길이가 된다. 따라서 eWord[1]과 eWord[0] 각각 16bit씩 총 32bit가 된다.
 		shift = (4*(3-i));
+		//	tmp1는 좌측 8bit를 제외한 나머지 비트(24bit)들을 사용중이다. 여기서 좌측으로 6bit 옮기면 2
 		tmp1 <<= 6;
+		//	맨 좌측에서 2번째 비트는 사용하지 않고 그 다음 비트부터 6개의 bit를 사용한다.
+		//	맨 좌측의 비트 2개를 사용하지 않는 이유는 추측상으로는 오류검출 같은데 추측일 뿐이고,
+		//	궁금해서 아래 tmp0는 맨 좌측부터 6개 비트를 사용해 보았다. 결과는 이상없이 나온다.
+		//	6개의 비트 중 1번째와 6번째는 row가 되고 가운데 2, 3, 4, 5번째 bit는 column이 된다.
+		//	예로 101101이면 row는 1 (0110) 1 이므로 11 즉 10진수의 3이 된다. column은 가운데 0110이므로 10진수의 6이된다.
+		//	3x6이 되므로 S2를 참조한다면 10진수 4로 정답은 0100(2)이다.(3x6인데 0부터 시작하므로 4번째줄의 7번째 값이다.)
 		row = ((tmp1 & 0x20000000) >> 28)|((tmp1&0x01000000) >> 24);
 		col =  (tmp1 & 0x1E000000) >> 25;
 		eWord[1] |= (SBox_DES[i  ][row][col] << shift);
-		tmp0 <<= 6;
-		row = ((tmp0 & 0x20000000) >> 28)|((tmp0 & 0x01000000) >> 24);
-		col =  (tmp0 & 0x1E000000) >> 25;
+		tmp0 <<= 8;
+		row = ((tmp0 & 0x80000000) >> 30)|((tmp0 & 0x04000000) >> 26);
+		col =  (tmp0 & 0x78000000) >> 27;
+		//	eWord[1]은 SBox_DES[0][][]~SBox_DES[3][][]까지 eWord[0]은 SBox_DES[4][][]~SBox_DES[7][][]까지 사용한다.
+		//	for문 한번에 2개의 S-box를 참조한다.
 		eWord[0] |= (SBox_DES[i+4][row][col] << shift);
 	}
+	//	마지막으로 eWord[0]의 16bit와 eWord[1]의 16bit를 OR연산을 통해 합친다. eWord[1]이 좌측이므로 <<16 연산을 통해 좌측에 붙인다.
 	eWord[0] |= (eWord[1] << 16);
+	// 최종적으로 32bit를 리턴한다.
 	return eWord[0];
 }
