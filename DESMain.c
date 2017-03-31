@@ -14,6 +14,9 @@ int main (void) {
 	WORD roundKey[32] = {0};
 	int i;
 
+	//2.라운드 키 생성
+	KeySchedule(key, roundKey);
+
 	//평문확인
 	puts("==== plainText_64bit ====");
 	viewBlock4x8(plainText[1]);
@@ -22,6 +25,7 @@ int main (void) {
 
 	//DES 암호화 알고리즘
 	puts("================ 암호화 ================");
+
 	//1.IP 초기순열
 	InitialPermutation(plainText);
 	puts("==== 초기순열(IP) 결과 ====");
@@ -29,12 +33,37 @@ int main (void) {
 	viewBlock4x8(plainText[0]);
 	puts("");
 
-	//2.라운드 키 생성
-	KeySchedule(key, roundKey);
-
 	//3.16라운드
 	for(i = 0 ; i < 16 ; i++)
-		Round(plainText[1], roundKey[i+1],roundKey[i]);
+		Round(plainText, roundKey[2*i+1],roundKey[2*i]);
+
+	//4.라운드 마지막에 스왑
+	swap32bit(plainText);
+	puts("==== 스왑결과 ====");
+	viewBlock4x8(plainText[1]);
+	viewBlock4x8(plainText[0]);
+	puts("");
+	//5.IIP 역순열
+	InverseInitialPermutation(plainText);
+	puts("==== 역 순열(IIP) 결과 ====");
+	viewBlock4x8(plainText[1]);
+	viewBlock4x8(plainText[0]);
+	puts("");
+
+	puts("================ 암호화 완료================");
+
+	//DES 복호화 알고리즘
+	puts("================ 복호화 ================");
+	//1.IP 초기순열
+	InitialPermutation(plainText);
+	puts("==== 초기순열(IP) 결과 ====");
+	viewBlock4x8(plainText[1]);
+	viewBlock4x8(plainText[0]);
+	puts("");
+
+	//3.16라운드
+	for(i = 15 ; i >= 0 ; i--)
+		Round(plainText, roundKey[2*i+1],roundKey[2*i]);
 
 	//4.라운드 마지막에 스왑
 	swap32bit(plainText);
@@ -45,8 +74,7 @@ int main (void) {
 	viewBlock4x8(plainText[1]);
 	viewBlock4x8(plainText[0]);
 	puts("");
-
-	puts("================ 암호화 완료================");
+	puts("================ 복호화 완료================");
 	return 0;
 }
 

@@ -7,7 +7,7 @@
 
 #include "DES.h"
 
-Round(WORD *dWord, WORD RoundKey1, WORD RoundKey0)
+void Round(WORD *dWord, WORD RoundKey1, WORD RoundKey0)
 {
 	WORD tmp[2]= {0,0 };
 	ExpansionPermutation(dWord[0], tmp);

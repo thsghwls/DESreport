@@ -16,8 +16,8 @@ typedef unsigned long WORD;
 void viewBlock4x8 (WORD);
 void viewBlock8x4 (WORD);
 
-KeySchedule(char *Key, WORD *RoundKey);
-Round(WORD *dWord, WORD RoundKey1, WORD RoundKey0);
+void KeySchedule(char *Key, WORD *RoundKey);
+void Round(WORD *dWord, WORD RoundKey1, WORD RoundKey0);
 void ExpansionPermutation (WORD RightHalf, WORD *eWord);
 void PermutedChoice1(WORD *Key);
 void PermutedChoice2(WORD *Key);
