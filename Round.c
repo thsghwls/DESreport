@@ -7,15 +7,15 @@
 
 #include "DES.h"
 
-// plainText와 해당 Round에 필요한 Round Key 48bit를 매개변수로 받음
+// >> plainText와 해당 Round에 필요한 Round Key 48bit를 매개변수로 받음 <<
 void Round(WORD *dWord, WORD RoundKey1, WORD RoundKey0)
 {
-	//	>> 라운드를 수행하기 위해 필요한 변수 정의 <<
-	// 32bit의 우측에 해당하는 plainText[0]을 참조하여 48bit로 확장하기 위해
-	//	EP를 수행하여 얻는 48bit의 데이터를 24bit씩 나눠저장하기위한 공간(tmp)
-	WORD tmp[2]= {0,0 };
+//	>> 라운드를 수행하기 위해 필요한 변수 정의 <<
+/*	32bit의 우측에 해당하는 plainText[0]을 참조하여 48bit로 확장하기 위해
+	EP를 수행하여 얻는 48bit의 데이터를 24bit씩 나눠저장하기위한 공간(tmp) */
+	WORD tmp[2]= {0};
 
-	//	확장순열을 수행해 32bit의 plainText[0]을 참조하여 48bit로 확장, 확장된 결과를 받기위해 tmp도 같이 parameter로 넘겨줌
+//	>> 확장순열을 수행해 32bit의 plainText[0]을 참조하여 48bit로 확장, 확장된 결과를 받기위해 tmp도 같이 parameter로 넘겨줌 <<
 	ExpansionPermutation(dWord[0], tmp);
 
 	// 확장순열을 통해 48bit로 확장된 데이터가 넘어왔다.(24bit 두개)

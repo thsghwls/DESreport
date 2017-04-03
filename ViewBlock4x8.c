@@ -7,16 +7,16 @@
 
 #include "DES.h"
 
-void viewBlock4x8 (WORD data) {
+void viewBlock4x8 (WORD block) {
 	int i;
 	WORD mask;
 	WORD temp;
-	printf(">>  %x  <<\n" , data);
+	printf(">>  %x  <<\n" , block);
 	puts(" =====================");
 	for(i = 31 ; i >= 0 ; i--) {
 		temp = 0;
 		mask = 0x00000001 << i;
-		temp = mask & data;
+		temp = mask & block;
 		temp = temp>> i;
 
 		if(i!=31&&(i+1)%8==0)
